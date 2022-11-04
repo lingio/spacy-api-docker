@@ -29,11 +29,17 @@ COPY . /app
 RUN cd /app/frontend && make clean && make
 RUN cd /app && make clean && make
 
+RUN groupadd -g 3000 nonroot && useradd -M -u 1000 -g 3000 nonroot
+RUN chmod g+wx /var/log/ && \
+    chmod g+wx /opt/local/ && \
+    usermod -aG adm nonroot
+
 # Configure nginx & supervisor
 RUN mv /app/config/nginx.conf /etc/nginx/sites-available/default &&\
   echo "daemon off;" >> /etc/nginx/nginx.conf && \
   mv /app/config/supervisor.conf /etc/supervisor/conf.d/
 
+USER nonroot # drop root here
 ENV PORT 80
 EXPOSE 80
 CMD ["bash", "/app/start.sh"]
